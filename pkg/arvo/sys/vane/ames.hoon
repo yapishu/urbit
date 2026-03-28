@@ -4655,6 +4655,14 @@
         ++  on-plea
           |=  [=ship =plea]
           ^+  event-core
+          ::  endomoon: if destination is our moon, route to %endomoon
+          ::  moon (earl) = 5-8 byte @p, parent planet = low 4 bytes.
+          ?:  ?&  =(%earl (clan:title ship))
+                  =(our (end [3 4] ship))
+              ==
+            =/  =wire  /moon/plea
+            =/  =cage  [%noun !>([%mohr [%.y `@pC`our] (jam [plea our])])]
+            (emit duct %pass wire %g %deal [our our /ames] %endomoon %poke cage)
           =/  ship-state  (~(get by peers.ames-state) ship)
           ::
           ?.  ?=([~ %known *] ship-state)
@@ -13145,7 +13153,7 @@
   =+  me-core=mesa
   =+  am-core=(ames now eny rof)
   =/  =task  ((harden task) wrapped-task)
-  ?:  &(?=(~ unix-duct) ?=(?(%hear %heer %mess) -.task))
+  ?:  &(?=(~ unix-duct) ?=(?(%hear %heer %mess %mohr) -.task))
     ::  drop incoming packets until we get a %born
     ::
     ::    this also prevents %nail gifts in the following scenarios:
@@ -13190,6 +13198,20 @@
     =^  mesa-moves  vane-gate
       (call:me-core(ames-state ames-state.vane-gate) sample)
     [(weld ames-moves mesa-moves) vane-gate]
+  ::
+  ::  endomoon: pass raw moon packet to %endomoon gall agent
+  ::
+      %mohr
+    :_  vane-gate
+    :~  [hen %pass /moon/hear %g %deal [our our /ames] %endomoon %poke noun+!>([%mohr +.task])]
+    ==
+  ::
+  ::  endomoon: send raw blob out via unix
+  ::
+      %mosd
+    :_  vane-gate
+    :~  [unix-duct.ames-state %give %send +.task]
+    ==
   ::
   ==
 ::

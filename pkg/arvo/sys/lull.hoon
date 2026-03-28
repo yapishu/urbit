@@ -900,6 +900,9 @@
         [%gulp path]                :: like %plug, but for |mesa
         $>(%halt deep)              :: halt flow after we hear a remote %flub
         [%goad =ship]               :: re-start flow after remote agent is %live
+    ::  endomoon: passthrough for in-process moon packets
+        [%mohr =lane blob=@]       :: raw inbound moon packet from vere
+        [%mosd =lane blob=@]       :: raw outbound moon blob to vere
     ==
   ::
   ::  $gift: effect from ames
