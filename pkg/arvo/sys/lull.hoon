@@ -903,6 +903,7 @@
     ::  endomoon: passthrough for in-process moon packets
         [%mohr =lane blob=@]       :: raw inbound moon packet from vere
         [%mosd =lane blob=@]       :: raw outbound moon blob to vere
+        [%emlc moon=ship agent=term =mark blob=@]  :: endomoon local delivery
     ==
   ::
   ::  $gift: effect from ames

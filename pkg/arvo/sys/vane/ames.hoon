@@ -13213,6 +13213,17 @@
     :~  [unix-duct.ames-state %give %send +.task]
     ==
   ::
+  ::  endomoon: deliver a gall deal locally with moon as source
+  ::
+      %emlc
+    =/  mon=ship  +<.task
+    =/  agent=term  +>-.task
+    =/  =mark  +>+<.task
+    =/  blob=@  +>+>.task
+    :_  vane-gate
+    :~  [hen %pass /moon/local %g %deal [mon our /ames] agent %raw-poke mark (cue blob)]
+    ==
+  ::
   ==
 ::
 ++  take
