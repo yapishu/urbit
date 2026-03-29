@@ -5409,6 +5409,13 @@
                     2^q.lan
                 ==
               ::
+              ::  endomoon: for moons, always compute sponsor from address
+              ::  so routing works even if jael didn't provide the sponsor
+              ::
+              =/  sponsor  ?:  =(%earl (clan:title ship))
+                             (end [3 4] ship)
+                           sponsor
+              ::
               ::  XX  routing hack to mimic old ames.
               ::
               ::    Before removing this, consider: moons when their planet is
@@ -5419,6 +5426,8 @@
               ?:  ?|  =(our ship)
                       ?&  !=(final-ship ship)
                           !=(%czar (clan:title ship))
+                          ::  endomoon: don't skip planet when routing moon traffic
+                          !=(%earl (clan:title final-ship))
                       ==
                   ==
                 (try-next-sponsor sponsor)
@@ -13202,8 +13211,81 @@
   ::  endomoon: pass raw moon packet to %endomoon gall agent
   ::
       %mohr
+    ::  endomoon: decrypt moon packet in ames using native crypto,
+    ::  then pass the decrypted plea to %endomoon as a local plea
+    =/  =lane  +<.task
+    =/  blob=@  +>.task
+    =/  =shot  (sift-shot blob)
+    =/  sndr  sndr.shot
+    ::  check if fakeship
+    =/  is-fake=?
+      =/  res  (rof [~ ~] /mohr [%j `beam`[[our %fake %da now] /]])
+      ?~  res  |
+      ?~  u.res  |
+      ;;(? q.q.u.u.res)
+    %-  (slog leaf+"ames: mohr: from {<sndr>} fake={<is-fake>}" ~)
+    =/  sndr-state  (~(get by peers.ames-state) sndr)
+    ?.  ?=([~ %known *] sndr-state)
+      %-  (slog leaf+"ames: mohr: {<sndr>} unknown" ~)
+      `vane-gate
+    %-  (slog leaf+"ames: mohr: deriving moon crub" ~)
+    =/  moon-cub=acru
+      ?:  is-fake
+        (pit:nu:crub:crypto 512 rcvr.shot)
+      =/  earl-feed=*
+        =/  res  (rof [~ ~] /mohr [%j `beam`[[our %earl %da now] /(scot %p rcvr.shot)/(scot %ud life.ames-state)]])
+        ?~  res  !!
+        ?~  u.res  !!
+        q.q.u.u.res
+      =/  moon-sec=@
+        =/  keys=*  +>+.earl-feed
+        ;;(@ +.-.keys)
+      (nol:nu:crub:crypto moon-sec)
+    %-  (slog leaf+"ames: mohr: moon crub ok, deriving sym" ~)
+    =/  moon-sym=symmetric-key
+      (derive-symmetric-key public-key.u.sndr-state sec:ex:moon-cub)
+    %-  (slog leaf+"ames: mohr: sym ok, decrypting" ~)
+    =/  pkt=(unit shut-packet)
+      (sift-shut-packet shot moon-sym life.u.sndr-state 1)
+    ?~  pkt
+      %-  (slog leaf+"ames: mohr: decrypt failed {<sndr>}" ~)
+      `vane-gate
+    %-  (slog leaf+"ames: mohr: DECRYPTED from {<sndr>} bone={<bone.u.pkt>} is-frag={<?=(%& -.meat.u.pkt)>}" ~)
+    ::  extract plea from the shut-packet
+    ?.  ?=(%& -.meat.u.pkt)
+      %-  (slog leaf+"ames: mohr: ack packet, ignoring" ~)
+      `vane-gate
+    %-  (slog leaf+"ames: mohr: frag num={<fragment-num.p.meat.u.pkt>} total={<num-fragments.p.meat.u.pkt>}" ~)
+    =/  msg=*  (cue fragment.p.meat.u.pkt)
+    ::  message may be [%plea vane path payload] or just [vane path payload]
+    =/  [vane=@tas pax=* payload=*]
+      ?:  ?=([%plea @ * *] msg)
+        [;;(@tas +<.msg) +>-.msg +>+.msg]
+      ?:  ?=([@ * *] msg)
+        [;;(@tas -.msg) +<.msg +>.msg]
+      ['%' 0 0]
+    ?:  =('%' vane)
+      %-  (slog leaf+"ames: mohr: unrecognized msg from {<sndr>}" ~)
+      `vane-gate
+    %-  (slog leaf+"ames: mohr: plea from {<sndr>} vane={<vane>}" ~)
+    ::  send ack back to sender (as the moon)
+    =/  ack-bone=bone  (mix bone.u.pkt 1)
+    =/  ack-pkt=shut-packet  [ack-bone message-num.u.pkt [%| [%| ok=& lag=~s0]]]
+    =/  ack-shot
+      %:  etch-shut-packet
+        ack-pkt
+        moon-sym
+        rcvr.shot  ::  moon is now the sender
+        sndr       ::  original sender is now the receiver
+        1          ::  moon's life
+        life.u.sndr-state  ::  their life
+      ==
+    =/  ack-blob=@  (etch-shot ack-shot)
+    ::  pass decrypted plea to endomoon
+    =/  =cage  [%noun !>([%mohr lane (jam [[vane pax payload] sndr])])]
     :_  vane-gate
-    :~  [hen %pass /moon/hear %g %deal [our our /ames] %endomoon %poke noun+!>([%mohr +.task])]
+    :~  [unix-duct.ames-state %give %send lane ack-blob]
+        [hen %pass /moon/hear %g %deal [our our /ames] %endomoon %poke cage]
     ==
   ::
   ::  endomoon: send raw blob out via unix
@@ -13255,6 +13337,10 @@
     ::
     ~>  %slog.0^leaf/"mesa: taking weird {<[[- +<]:sign]>} for {(spud wire)}"
     take:me-core
+  ::  endomoon: silently handle responses on moon wires
+  ::
+  ?:  ?=([%moon *] wire)
+    `vane-gate
   ?~  parsed-wire=(parse-bone-wire wire)
     ::  not a /bone wire—used when passing %pleas to a local vane; use |ames
     ::  XX this is not a |mesa wire so it shouldn't happen for migrated flows
