@@ -13291,8 +13291,70 @@
   ::  endomoon: send raw blob out via unix
   ::
       %mosd
-    :_  vane-gate
-    :~  [unix-duct.ames-state %give %send +.task]
+    =/  =lane  +<.task
+    =/  blob=@  +>.task
+    ::  check if this is an endomoon encrypted-send request
+    ::  convention: blob = (jam [%endo moon her bone msg-num raw-plea])
+    =/  decoded=(unit *)  (mole |.((cue blob)))
+    ?.  ?&  ?=(^ decoded)
+            ?=([%endo @ @ @ @ @] u.decoded)
+        ==
+      ::  normal raw send
+      :_  vane-gate
+      :~  [unix-duct.ames-state %give %send lane blob]
+      ==
+    ::  endomoon encrypted send: encrypt using ames's real crypto
+    =/  args=*  +.u.decoded  ::  [moon her bone msg-num raw-plea]
+    =/  moon=ship  ;;(@p -.args)
+    =/  her=ship   ;;(@p -:+.args)
+    =/  =bone      ;;(@ud -:+:+.args)
+    =/  msg-num=@ud  ;;(@ud -:+:+:+.args)
+    =/  raw-plea=@   ;;(@ +:+:+:+.args)
+    ::  get recipient's peer state
+    =/  her-state  (~(get by peers.ames-state) her)
+    ?.  ?=([~ %known *] her-state)
+      %-  (slog leaf+"ames: mosd: recipient {<her>} unknown" ~)
+      `vane-gate
+    ::  derive moon's crub (same as %mohr handler)
+    =/  is-fake=?
+      =/  res  (rof [~ ~] /mosd [%j `beam`[[our %fake %da now] /]])
+      ?~  res  |
+      ?~  u.res  |
+      ;;(? q.q.u.u.res)
+    =/  moon-cub=acru
+      ?:  is-fake
+        (pit:nu:crub:crypto 512 moon)
+      =/  earl-feed=*
+        =/  res  (rof [~ ~] /mosd [%j `beam`[[our %earl %da now] /(scot %p moon)/(scot %ud life.ames-state)]])
+        ?~  res  !!
+        ?~  u.res  !!
+        q.q.u.u.res
+      =/  moon-sec=@
+        =/  keys=*  +>+.earl-feed
+        ;;(@ +.-.keys)
+      (nol:nu:crub:crypto moon-sec)
+    =/  moon-sym=symmetric-key
+      (derive-symmetric-key public-key.u.her-state sec:ex:moon-cub)
+    ::  build shut-packets for all fragments and send
+    =/  num-frags=fragment-num  (max 1 (met 13 raw-plea))
+    ?~  route.u.her-state
+      %-  (slog leaf+"ames: mosd: no route to {<her>}" ~)
+      `vane-gate
+    %-  (slog leaf+"ames: mosd: sending {<num-frags>} frag(s) as moon to {<her>}" ~)
+    =/  frag-num=@ud  0
+    =/  sends=(list move)  ~
+    |-
+    ?:  =(frag-num num-frags)
+      :_  vane-gate
+      (flop sends)
+    =/  pkt=shut-packet
+      [bone `message-num`msg-num [%& [num-frags `fragment-num`frag-num `fragment`raw-plea]]]
+    =/  out-shot=shot
+      (etch-shut-packet pkt moon-sym moon her 1 life.u.her-state)
+    =/  out-blob=@  (etch-shot out-shot)
+    %=  $
+      frag-num  +(frag-num)
+      sends  [[unix-duct.ames-state %give %send lane.u.route.u.her-state out-blob] sends]
     ==
   ::
   ::  endomoon: deliver a gall deal locally with moon as source
@@ -13302,6 +13364,8 @@
     =/  agent=term  +>-.task
     =/  =mark  +>+<.task
     =/  blob=@  +>+>.task
+    ::  if agent is on our ship, deliver locally with moon as source
+    ::  if agent is on remote ship, route through gall→ames normally
     :_  vane-gate
     :~  [hen %pass /moon/local %g %deal [mon our /ames] agent %raw-poke mark (cue blob)]
     ==
