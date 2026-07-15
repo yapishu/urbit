@@ -4475,6 +4475,12 @@
   ++  goad
     |=  syd=(unit desk)
     ^+  ..abet
+    ::  Hack: if %base desk is involved, the change might have caused gall
+    ::  recompilation, making it suspend all agents. In that case we rebuild
+    ::  agents from all desks to make sure they are unsuspended
+    ::
+    =?  syd  =(syd `%base)  ~
+    ::
     =^  sat=(list [=desk =bill])  ..abet
       =/  desks=(list desk)
         ?^  syd  ~[u.syd]
