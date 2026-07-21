@@ -10010,8 +10010,8 @@
                 ev-core
               =+  ;;([%plea =plea] +.gage)
               ?.  ?&  =(%g vane.plea)
-                      =(/ping path.plea)
-                      ?=([%deal * %ping %poke *] payload.plea)
+                      ?=([%ge %ping ~] path.plea)
+                      ?=([%0 [%m %noun *]] payload.plea)
                   ==
                 ev-core
               %-  ev-emit

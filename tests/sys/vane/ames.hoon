@@ -277,6 +277,11 @@
   ^-  ?
   ?=([%pass ^ %g %plea *] card.move)
 ::
+++  is-move-bind
+  |=  =move:ames
+  ^-  ?
+  ?=([%give %bind *] card.move)
+::
 ++  snag-packet
   |=  [index=@ud moves=(list move:ames)]
   ^-  [=lane:ames =blob:ames]
@@ -891,6 +896,41 @@
       !>  0
       !>  (lent `(list move:ames)`moves6)
   ==
+::
+++  test-bind-mesa  ^-  tang
+  ::  ~bud receives a Mesa ping-app poke from ~nec over a bit-63 session lane.
+  ::  Only authenticated, session-heard Gall ping pokes emit %bind.
+  ::
+  =/  session-lane=lane:pact:ames  `@ux`0x8000.0000.0000.abcd
+  =/  ping-plea=plea:ames  [%g /ge/ping [%0 [%m %noun !>(~)]]]
+  =.  chums.ames-state.bud
+    %+  ~(put by chums.ames-state.bud)  ~nec
+    =|  =fren-state:ames
+    =.  -.fren-state
+      :*  symmetric-key=nec-sym
+          life=2
+          rift=0
+          [public-keys=pub.saf pass=pass]:ames-state.nec
+          sponsor=~nec
+      ==
+    [%known fren-state]
+  =^  moves1  nec  (call nec ~[/g/ping] %plea ~bud ping-plea)
+  =/  poke-roof
+    (make-roof /flow/0/poke/for/~bud/1 message+!>(plea/ping-plea))
+  =^  moves2  nec
+    %+  call  nec(rof poke-roof)
+    :+  :+  :-  %ames
+            /mesa/flow/ack/for/~bud/0/0
+          //unix
+        ~
+      %moke
+    (snag-moke 0 moves1)
+  =/  [ignore-lane=lane:pact:ames blob=@]  (snag-push 0 moves2)
+  =^  moves3  bud  (call bud ~[//unix] %heer session-lane blob)
+  %+  expect-eq
+    !>  ^-  (list move:ames)
+        [~[//unix] %give %bind ~nec 0 0 1 session-lane]~
+    !>  (skim moves3 is-move-bind)
 ::
 ++  test-ames-flow-with-new-rift  ^-  tang
   ::  ~nec receives a gift from %jael with ~bud's new rift
