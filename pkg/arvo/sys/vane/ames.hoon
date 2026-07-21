@@ -9619,6 +9619,7 @@
                 %snub  sy-abet:(sy-snub:sy-core [form ships]:task)
                 %stun  sy-abet:(sy-stun:sy-core stun.task)
                 %dear  sy-abet:(sy-dear:sy-core +.task)
+                %fell  sy-abet:(sy-fell:sy-core +.task)
                 %tame  sy-abet:(sy-tame:sy-core ship.task)
                 %sift  sy-abet:(sy-sift:sy-core ships.task)
                 %spew  sy-abet:(sy-spew:sy-core veb.task)
@@ -9992,12 +9993,37 @@
             ::
             ?>  %-  authenticate
                 [(root:lss (met 3 dat.data)^dat.data) aut.data pok.pact]
+            =/  =gage:mess
+              ;;(gage:mess (cue (decrypt-spac space dat.data cyf)))
+            =.  ev-core
+              ?.  ?&  =(0 hop.pact)
+                      ::  only session-shaped lanes (opaque atom, bit 63
+                      ::  set) produce bindings; plain udp lanes never
+                      ::  emit %bind, so a runtime that predates it is
+                      ::  undisturbed on a pure-udp network
+                      ::
+                      ?=(@ lane)
+                      =(1 (cut 0 [63 1] lane))
+                      ?=([%message *] gage)
+                      ?=([%plea *] +.gage)
+                  ==
+                ev-core
+              =+  ;;([%plea =plea] +.gage)
+              ?.  ?&  =(%g vane.plea)
+                      =(/ping path.plea)
+                      ?=([%deal * %ping %poke *] payload.plea)
+                  ==
+                ev-core
+              %-  ev-emit
+              :*  unix-duct  %give  %bind  her-pok
+                  rif-pok  bone.pok  mess.pok  lane
+              ==
             ::
             %:  hear-poke:ev-mess
               dud
               [her.ack.pact (pout ack)]
               [her.pok.pact (pout pok)]
-              ;;(gage:mess (cue (decrypt-spac space dat.data cyf)))
+              gage
             ==
           ::
           ++  hear-peek
@@ -12104,6 +12130,8 @@
                   %&  `@ux`p.lane
               ::
                   %|
+                ?:  =(1 (cut 0 [63 1] p.lane))
+                  `@ux`p.lane
                 :-  %if
                 [ip=`@if`(end [0 32] p.lane) pt=`@ud`(cut 0 [32 16] p.lane)]
               ==
@@ -12112,6 +12140,52 @@
             =.  route.+.u.peer  `[direct=%.y lane]
             (~(put by peers.ames-state) ship u.peer)
           (sy-emit unix-duct %give %nail ship ~[lane])
+        ::  +sy-fell: handle dead lane from unix
+        ::
+        ::    a connection-shaped lane (e.g. a QUIC session) has closed;
+        ::    drop the route only if it still matches the dead lane, so a
+        ::    route learned since the connection died is left alone
+        ::
+        ++  sy-fell
+          |=  [=ship =lane]
+          ^+  sy-core
+          ?:  =(~ unix-duct)
+            %-  (slog leaf+"ames: unix-duct pending; no-op" ~)
+            sy-core
+          ?:  =(%czar (clan:title ship))
+            sy-core
+          =/  peer  (find-peer ship)
+          ?.  ?=([?(%ames %mesa) ~ %known *] peer)
+            sy-core
+          ?:  ?=(%mesa -.peer)
+            =/  lan=lane:pact
+              ?-  -.lane
+                  %&  `@ux`p.lane
+              ::
+                  %|
+                ?:  =(1 (cut 0 [63 1] p.lane))
+                  `@ux`p.lane
+                :-  %if
+                [ip=`@if`(end [0 32] p.lane) pt=`@ud`(cut 0 [32 16] p.lane)]
+              ==
+            =/  rot  lane.+.u.peer
+            ?~  rot
+              sy-core
+            ?.  =(lane.u.rot lan)
+              sy-core
+            =.  chums.ames-state
+              =.  lane.+.u.peer  ~
+              (~(put by chums.ames-state) ship u.peer)
+            (sy-emit unix-duct %give %nail ship ~)
+          =/  rot  route.+.u.peer
+          ?~  rot
+            sy-core
+          ?.  =(lane.u.rot lane)
+            sy-core
+          =.  peers.ames-state
+            =.  route.+.u.peer  ~
+            (~(put by peers.ames-state) ship u.peer)
+          (sy-emit unix-duct %give %nail ship ~)
         ::
         ::  +sy-tame: handle request to delete a route
         ::
@@ -14394,7 +14468,7 @@
     ::  flow-independent tasks
     ::
       $?  %vega  %init  %born  %snub  %spew  %stun  %gulp
-          %sift  %plug  %dear  %init  %tame  %cong
+          %sift  %plug  %dear  %init  %tame  %cong  %fell
       ==
     (call:me-core sample)
     ::  common tasks

@@ -900,6 +900,7 @@
         [%gulp path]                :: like %plug, but for |mesa
         $>(%halt deep)              :: halt flow after we hear a remote %flub
         [%goad =ship]               :: re-start flow after remote agent is %live
+        [%fell =ship =lane]         :: dead lane from unix; drop route if current
     ==
   ::
   ::  $gift: effect from ames
@@ -939,6 +940,7 @@
         [%turf turfs=(list turf)]
         [%saxo sponsors=(list ship)]
     ::
+        [%bind =ship rift=@ bone=@ seq=@ =lane:pact]
         [%push p=(list lane:pact) q=@]   :: send a request/response packet
         [%sage =sage:mess]               :: give deserialized/open payload
         $>(%page mess)                   :: give serialized/sealed payload

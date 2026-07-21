@@ -799,6 +799,99 @@
     !>  ~
     !>  (sy ,.moves3)
 ::
+++  test-fell-ames  ^-  tang
+  ::  ~nec's route to ~marbud is 0xffff.7f00.0001 (see fixtures)
+  ::
+  =/  dead-lane=lane:ames   [%| `@`0xffff.7f00.0001]
+  =/  other-lane=lane:ames  [%| `@`0xffff.7f00.0002]
+  ::  a %fell for a lane we are not using is ignored
+  ::
+  =^  moves1  nec  (call nec ~[//unix] %fell ~marbud other-lane)
+  ::  a %fell for the current route drops it and syncs unix
+  ::
+  =^  moves2  nec  (call nec ~[//unix] %fell ~marbud dead-lane)
+  ::  a repeated %fell no longer matches a route
+  ::
+  =^  moves3  nec  (call nec ~[//unix] %fell ~marbud dead-lane)
+  ;:  weld
+    %+  expect-eq
+      !>  0
+      !>  (lent `(list move:ames)`moves1)
+    %+  expect-eq
+      !>  ^-  (list move:ames)
+          [~[//unix] %give %nail ~marbud ~]~
+      !>  moves2
+    %+  expect-eq
+      !>  0
+      !>  (lent `(list move:ames)`moves3)
+  ==
+::
+++  test-fell-mesa  ^-  tang
+  ::  give ~bud a |mesa chum for ~marbud with a known lane
+  ::
+  =.  chums.ames-state.bud
+    %+  ~(put by chums.ames-state.bud)  ~marbud
+    =|  =fren-state:ames
+    =.  -.fren-state
+      :*  symmetric-key=bud-marbud-sym
+          life=5
+          rift=0
+          [public-keys=pub.saf pass=pass]:ames-state.marbud
+          sponsor=~bud
+      ==
+    =.  lane.fren-state  `[hop=0 `lane:pact:ames`[%if .127.0.0.1 65.535]]
+    [%known fren-state]
+  ::  0xffff.7f00.0001 is 127.0.0.1:65535 in the unix lane encoding
+  ::
+  =/  dead-lane=lane:ames   [%| `@`0xffff.7f00.0001]
+  =/  other-lane=lane:ames  [%| `@`0xfffe.7f00.0001]
+  =^  moves1  bud  (call bud ~[//unix] %fell ~marbud other-lane)
+  =^  moves2  bud  (call bud ~[//unix] %fell ~marbud dead-lane)
+  =^  moves3  bud  (call bud ~[//unix] %fell ~marbud dead-lane)
+  ::  session ids are Mesa opaque atom lanes, carried through old $lane as
+  ::  tagged address atoms in the %fell task
+  ::
+  =/  sid=@ux  0x8000.0000.0000.abcd
+  =.  chums.ames-state.bud
+    %+  ~(put by chums.ames-state.bud)  ~marbud
+    =|  =fren-state:ames
+    =.  -.fren-state
+      :*  symmetric-key=bud-marbud-sym
+          life=5
+          rift=0
+          [public-keys=pub.saf pass=pass]:ames-state.marbud
+          sponsor=~bud
+      ==
+    =.  lane.fren-state  `[hop=0 `lane:pact:ames`sid]
+    [%known fren-state]
+  =/  dead-opaque=lane:ames   [%| sid]
+  =/  other-opaque=lane:ames  [%| `@ux`0x8000.0000.0000.abce]
+  =^  moves4  bud  (call bud ~[//unix] %fell ~marbud other-opaque)
+  =^  moves5  bud  (call bud ~[//unix] %fell ~marbud dead-opaque)
+  =^  moves6  bud  (call bud ~[//unix] %fell ~marbud dead-opaque)
+  ;:  weld
+    %+  expect-eq
+      !>  0
+      !>  (lent `(list move:ames)`moves1)
+    %+  expect-eq
+      !>  ^-  (list move:ames)
+          [~[//unix] %give %nail ~marbud ~]~
+      !>  moves2
+    %+  expect-eq
+      !>  0
+      !>  (lent `(list move:ames)`moves3)
+    %+  expect-eq
+      !>  0
+      !>  (lent `(list move:ames)`moves4)
+    %+  expect-eq
+      !>  ^-  (list move:ames)
+          [~[//unix] %give %nail ~marbud ~]~
+      !>  moves5
+    %+  expect-eq
+      !>  0
+      !>  (lent `(list move:ames)`moves6)
+  ==
+::
 ++  test-ames-flow-with-new-rift  ^-  tang
   ::  ~nec receives a gift from %jael with ~bud's new rift
   ::
